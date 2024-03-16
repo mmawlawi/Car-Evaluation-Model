@@ -45,28 +45,27 @@ def validate_input_data(data):
 def predict():
     data = request.get_json(force=True)
     
-
     is_valid, message = validate_input_data(data)
     if not is_valid:
         return jsonify({'error': message}), 400
-    
 
-    input_data = DataFrame([data])
+    try:
+        input_data = DataFrame([data])
 
-    # run python deploy.py and test.py you'll get success!!!. Flask works fine, the problem is from the preprocessor
-    return jsonify({'success': message, 'input_data': input_data.to_dict(orient='records')})
+        # Ensure data types match expected types
+        for col in input_data.columns:
+            if col in EXPECTED_FIELDS:
+                input_data[col] = input_data[col].astype(EXPECTED_FIELDS[col])
 
-    # # Preprocess input data ------ @Maher if you run this one
-    # preprocessed_data = preprocessor.transform(input_data)
+        # Predict
+        prediction = model.predict(input_data)
 
-    # # Predict
-    # prediction = model.predict(preprocessed_data)
-
-    # # Return prediction
-    # return jsonify({'prediction': prediction.tolist()})
-
-    # @Maher the problem ---->>>>
-    # return jsonify({'success': message, 'preprocessed_data': preprocessed_data.to_dict(orient='records')})
+        # Return prediction
+        return jsonify({'prediction': prediction.tolist()})
+    except Exception as e:
+        # Log and return the error if any step fails
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+
