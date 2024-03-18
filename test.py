@@ -6,7 +6,7 @@ input_data = {
     "Brand": "Ssangyong",
     "Year": 2022,
     "Model": "Rexton",
-    "Car/Suv": "Sutherland Isuzu Ute",
+
     "UsedOrNew": "DEMO",
     "Transmission": "Automatic",
     "DriveType": "AWD",
@@ -14,7 +14,7 @@ input_data = {
     "FuelConsumption": 8.7,
     "Kilometres": 5595,
     "CylindersinEngine": 4,
-    "BodyType": "SUV",
+
     "Doors": 4,
     "Seats": 7,
     "EngineL": 2.2,
