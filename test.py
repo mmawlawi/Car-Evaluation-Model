@@ -1,5 +1,4 @@
 import requests
-import json
 
 # Define your input data
 input_data = {
@@ -24,6 +23,9 @@ input_data = {
 
 # Send a POST request to the API endpoint
 response = requests.post("http://127.0.0.1:5000/predict", json=input_data)
+feature_importance = requests.get("http://127.0.0.1:5000/aggregated-feature-importance")
+
 
 # Print the response
 print(response.json())
+print(feature_importance.json())
