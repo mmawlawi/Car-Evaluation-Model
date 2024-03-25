@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
 from joblib import load
-import pandas as pd
-import matplotlib.pyplot as plt
+from pandas import DataFrame, Series
+from matplotlib.pyplot import figure, bar, xlabel, ylabel, title, xticks, tight_layout, savefig
 
 app = Flask(__name__)
 
@@ -33,7 +33,7 @@ def predict():
     data = request.get_json(force=True)
     
     # Initialize DataFrame with expected types
-    input_data = pd.DataFrame({field: pd.Series(dtype=typ) for field, typ in EXPECTED_FIELDS.items()})
+    input_data = DataFrame({field: Series(dtype=typ) for field, typ in EXPECTED_FIELDS.items()})
     
     missing_fields = []
     for field, dtype in EXPECTED_FIELDS.items():
@@ -129,17 +129,17 @@ def feature_importance_graph():
         return jsonify({'error': feature_importance['error']}), 500
     
     # Create a bar graph
-    plt.figure(figsize=(12, 8))
-    plt.bar(feature_importance.keys(), feature_importance.values(), color='skyblue')
-    plt.xlabel('Features')
-    plt.ylabel('Importance')
-    plt.title('Feature Importance')
-    plt.xticks(rotation=45, ha="right")
-    plt.tight_layout()  # Adjust layout to make room for the rotated x-axis labels
+    figure(figsize=(12, 8))
+    bar(feature_importance.keys(), feature_importance.values(), color='skyblue')
+    xlabel('Features')
+    ylabel('Importance')
+    title('Feature Importance')
+    xticks(rotation=45, ha="right")
+    tight_layout()  # Adjust layout to make room for the rotated x-axis labels
 
     # Save the plot to a BytesIO object and return it
     buf = BytesIO()
-    plt.savefig(buf, format='png')
+    savefig(buf, format='png')
     buf.seek(0)
     return send_file(buf, mimetype='image/png')
 
