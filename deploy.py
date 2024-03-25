@@ -114,7 +114,7 @@ def get_feature_importance_data():
     except Exception as e:
         return {'error': str(e)}
 
-@app.route('/aggregated-feature-importance', methods=['GET'])
+@app.route('/feature-importance', methods=['GET'])
 def aggregated_feature_importance():
     data = get_feature_importance_data()
     if 'error' in data:
