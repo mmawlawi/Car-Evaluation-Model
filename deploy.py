@@ -1,6 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
+from io import BytesIO
 from joblib import load
 import pandas as pd
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 
@@ -90,8 +92,11 @@ def get_feature_names(column_transformer):
                 
     return feature_names
 
-@app.route('/aggregated-feature-importance', methods=['GET'])
-def aggregated_feature_importance():
+def get_feature_importance_data():
+    """
+    This function encapsulates the logic to fetch and process feature importance data.
+    It returns a dictionary with feature names as keys and their importances as values.
+    """
     try:
         # Extract the CatBoost model from the pipeline
         catboost_model = model.named_steps['model']
@@ -104,12 +109,39 @@ def aggregated_feature_importance():
 
         # Assuming feature_names is accessible; otherwise, it should be generated as previously discussed
         aggregated_importances = get_aggregated_feature_importances(feature_names, feature_importances)
-
-        # Return the aggregated feature importances
-        return jsonify(aggregated_importances)
+        
+        return aggregated_importances  # Return the dictionary directly
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return {'error': str(e)}
 
+@app.route('/aggregated-feature-importance', methods=['GET'])
+def aggregated_feature_importance():
+    data = get_feature_importance_data()
+    if 'error' in data:
+        return jsonify({'error': data['error']}), 500
+    else:
+        return jsonify(data)
+
+@app.route('/feature-importance-graph', methods=['GET'])
+def feature_importance_graph():
+    feature_importance = get_feature_importance_data()
+    if 'error' in feature_importance:
+        return jsonify({'error': feature_importance['error']}), 500
+    
+    # Create a bar graph
+    plt.figure(figsize=(12, 8))
+    plt.bar(feature_importance.keys(), feature_importance.values(), color='skyblue')
+    plt.xlabel('Features')
+    plt.ylabel('Importance')
+    plt.title('Feature Importance')
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()  # Adjust layout to make room for the rotated x-axis labels
+
+    # Save the plot to a BytesIO object and return it
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)
