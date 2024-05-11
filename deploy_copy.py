@@ -3,10 +3,11 @@ from io import BytesIO
 from joblib import load
 from pandas import DataFrame, Series
 from matplotlib.pyplot import figure, bar, xlabel, ylabel, title, xticks, tight_layout, savefig
-import os
+from waitress import serve
+import logging
 
 app = Flask(__name__)
-app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'False') == 'True'
+logging.basicConfig(level=logging.INFO)
 
 model = load('pipeline_cat.joblib')
 
@@ -145,10 +146,6 @@ def feature_importance_graph():
     buf.seek(0)
     return send_file(buf, mimetype='image/png')
 
-@app.before_request
-def log_request_info():
-    app.logger.debug('Headers: %s', request.headers)
-    app.logger.debug('Body: %s', request.get_data())
-
-# if __name__ == '__main__':
-#     serve(app, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    logging.info("Starting Flask app with Waitress server...")
+    serve(app, port=8080)
